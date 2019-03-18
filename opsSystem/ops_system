@@ -1,0 +1,28 @@
+#define dependences
+#escape `
+FROM centos
+LABEL maintainer=hujingguangsa@gmail.com
+
+ARG PERCONA_SERVER_URL="https://www.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.25-28/binary/redhat/7/x86_64/Percona-Server-5.7.25-28-rc335905-el7-x86_64-bundle.tar"
+ARG OPS_SYSTEM_URL="https://github.com/hujingguang/OpsSystem/archive/master.zip"
+ARG YUM_PKG="subversion git salt-master  python-pip mysql-devel gcc mysql-server mysql wget python-devel unzip nginx net-tools psmisc salt"
+ARG PYTHON_LIB="django==v1.9.0 salt==v2015.8.13 pexpect msgpack-python MySQL-python pyaml tornado==v4.3 zmq uwsgi "
+ARG APP_DIR="/data/ops_system/OpsSystem"
+
+WORKDIR /root
+RUN yum install epel-release -y  && yum clean all &&  yum list &>/dev/null
+RUN yum install ${YUM_PKG} -y
+RUN pip install ${PYTHON_LIB}
+RUN useradd -M -r mysql && mkdir -p /tmp/percona
+RUN cd /tmp/percona && wget ${PERCONA_SERVER_URL} -O mysql.tar  \
+    && tar -xf mysql.tar && yum remove mariadb* -y && yum install Percona-Server-* -y && rm -rf /tmp/percona/*
+RUN mkdir -p /root/ops /var/www/static 
+RUN wget ${OPS_SYSTEM_URL} -O master.zip && unzip master.zip && rm -f master.zip && mv ./OpsSystem-master/*  /root/ops/ && rm -rf ./ops/static 
+COPY ./start.sh ./start.sh
+COPY ./my.cnf /etc/my.cnf
+COPY ./app.conf /etc/nginx/nginx.conf 
+COPY ./uwsgi.conf ./uwsgi.ini
+RUN chmod 777 ./start.sh
+EXPOSE 80 8888 3306 81
+
+CMD ["./start.sh"]
