@@ -1,0 +1,15 @@
+FROM centos
+LABEL maintianer=hujingguangsa@gmail.com
+WORKDIR /opt
+ARG PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/3.7.2/Python-3.7.2.tgz"
+ARG DEPENDENCE_PKG="unzip gcc wget make zlib zlib-devel libffi-devel openssl openssl-devel "
+ARG PIP_URL="https://files.pythonhosted.org/packages/36/fa/51ca4d57392e2f69397cd6e5af23da2a8d37884a605f9e3f2d3bfdc48397/pip-19.0.3.tar.gz"
+ARG SETUP_TOOLS="https://files.pythonhosted.org/packages/c2/f7/c7b501b783e5a74cf1768bc174ee4fb0a8a6ee5af6afa92274ff964703e0/setuptools-40.8.0.zip"
+ARG PYTHON_LIB="django==v2.1.1 requests qiniu pymysql djangorestframework"
+RUN yum install epel-release -y && yum clean all && yum makecache &>/dev/null
+RUN yum install  ${DEPENDENCE_PKG} -y
+RUN wget ${PYTHON_DOWNLOAD_URL} && tar -zxf Python-3.7.2.tgz && cd Python-3.7.2 && ./configure --prefix=/usr/local/python3.7  --with-ssl && make && make install && cd .. && rm -rf Python-3.7*
+RUN wget ${SETUP_TOOLS} &&  unzip setuptools-40.8.0.zip && cd setuptools-40.8.0 && /usr/local/python3.7/bin/python3 setup.py install && rm -rf ./*
+RUN wget ${PIP_URL} &&  tar -zxf pip-19.0.3.tar.gz && cd pip-19.0.3 && /usr/local/python3.7/bin/python3 setup.py install && rm -rf ./*
+RUN /usr/local/python3.7/bin/pip install ${PYTHON_LIB}
+
