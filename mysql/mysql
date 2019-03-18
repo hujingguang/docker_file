@@ -1,0 +1,14 @@
+ARG MYSQL_URL="https://www.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.25-28/binary/redhat/7/x86_64/Percona-Server-5.7.25-28-rc335905-el7-x86_64-bundle.tar"
+RUN useradd mysql
+RUN yum install epel-release -y  && yum clean all &>/dev/null && yum makecache &>/dev/null
+#RUN yum install wget -y 
+#RUN mkdir /tmp/percona && cd /tmp/percona && wget ${MYSQL_URL} -O ./mysql.tar  \
+#    && tar -xf mysql.tar && yum remove mariadb* -y && yum install Percona-Server-* -y && rm -rf /tmp/percona
+COPY ./Percona-Server-5.7.25-28-rc335905-el7-x86_64-bundle.tar ./Percona-Server-5.7.25-28-rc335905-el7-x86_64-bundle.tar
+COPY ./files/my.cnf /etc/my.cnf
+RUN tar -xf Percona-Server-5.7.25-28-rc335905-el7-x86_64-bundle.tar && yum remove mariadb* -y && yum install Percona-Server-* -y && rm -rf Percona*
+WORKDIR /opt
+COPY ./start.sh  ./start.sh
+RUN chmod 777 ./start.sh  && mkdir -p /var/lib/mysql && chown -R mysql /var/lib/mysql
+EXPOSE 3306
+CMD ["./start.sh"]

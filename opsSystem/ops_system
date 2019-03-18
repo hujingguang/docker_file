@@ -10,7 +10,7 @@ ARG PYTHON_LIB="django==v1.9.0 salt==v2015.8.13 pexpect msgpack-python MySQL-pyt
 ARG APP_DIR="/data/ops_system/OpsSystem"
 
 WORKDIR /root
-RUN yum install epel-release -y  && yum clean all &&  yum list &>/dev/null
+RUN yum install epel-release -y  && yum clean all &&  yum makecache &>/dev/null
 RUN yum install ${YUM_PKG} -y
 RUN pip install ${PYTHON_LIB}
 RUN useradd -M -r mysql && mkdir -p /tmp/percona
